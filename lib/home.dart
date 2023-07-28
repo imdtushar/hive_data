@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class Home extends StatefulWidget {
@@ -14,6 +15,9 @@ class _HomeState extends State<Home> {
     super.initState();
     readData();
   }
+
+  //TODO Scrolling Bool
+  bool isScrolled = true;
 
   //TODO Controller
   TextEditingController titleController = TextEditingController();
@@ -129,11 +133,13 @@ class _HomeState extends State<Home> {
             seedColor: const Color(0xff80C4E7),
           )),
       home: Scaffold(
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
             showFormModel(context, null);
           },
-          child: const Icon(Icons.add),
+          isExtended: isScrolled,
+          icon: const Icon(Icons.add),
+          label: const Text("Add Data"),
         ),
         appBar: AppBar(
           title: const Text("Hive Data"),
@@ -141,49 +147,64 @@ class _HomeState extends State<Home> {
         body: SafeArea(
           child: RefreshIndicator(
             onRefresh: () => readData(),
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-              itemCount: taskList.length,
-              itemBuilder: (context, index) {
-                var currentItem = taskList[index];
-                return Card(
-                  color: Colors.orangeAccent.shade200,
-                  elevation: 4,
-                  child: ListTile(
-                    title: Text(
-                      currentItem['title'],
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    subtitle: Text(
-                      currentItem['task'],
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            showFormModel(context, currentItem['key']);
-                          },
-                          icon: const Icon(
-                            Icons.edit,
-                            color: Colors.white,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            deleteData(currentItem['key']);
-                          },
-                          icon: const Icon(
-                            Icons.delete,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
+            child: NotificationListener<UserScrollNotification>(
+              onNotification: (notification) {
+                if (notification.direction == ScrollDirection.forward) {
+                  setState(() {
+                    isScrolled = true;
+                  });
+                }else if(notification.direction == ScrollDirection.reverse){
+                  setState(() {
+                    isScrolled = false;
+                  });
+                }
+                return true;
               },
+              child: ListView.builder(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                itemCount: taskList.length,
+                itemBuilder: (context, index) {
+                  var currentItem = taskList[index];
+                  return Card(
+                    color: Colors.orangeAccent.shade200,
+                    elevation: 4,
+                    child: ListTile(
+                      title: Text(
+                        currentItem['title'],
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      subtitle: Text(
+                        currentItem['task'],
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              showFormModel(context, currentItem['key']);
+                            },
+                            icon: const Icon(
+                              Icons.edit,
+                              color: Colors.white,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              deleteData(currentItem['key']);
+                            },
+                            icon: const Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ),
