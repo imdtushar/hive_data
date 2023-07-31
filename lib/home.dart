@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:hive_data/firebase_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class Home extends StatefulWidget {
@@ -13,8 +14,13 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    initializeFirebaseService();
+
     readData();
   }
+
+
+
 
   //TODO Scrolling Bool
   bool isScrolled = true;
@@ -153,7 +159,7 @@ class _HomeState extends State<Home> {
                   setState(() {
                     isScrolled = true;
                   });
-                }else if(notification.direction == ScrollDirection.reverse){
+                } else if (notification.direction == ScrollDirection.reverse) {
                   setState(() {
                     isScrolled = false;
                   });
